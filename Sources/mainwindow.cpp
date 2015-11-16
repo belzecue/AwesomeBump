@@ -196,7 +196,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton3DSettings ,SIGNAL(toggled(bool)),dock3Dsettings,SLOT(setVisible(bool)));
 
 
-    //ui->verticalLayout3DImage->addWidget(glWidget);
+    ui->verticalLayout3DImage->addWidget(glWidget);
     ui->verticalLayout2DImage->addWidget(glImage);
 
 

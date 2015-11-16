@@ -1034,10 +1034,11 @@ void GLImage::resetView(){
 
     if (!activeImage) return;
 
-    makeCurrent();
+    //makeCurrent();
 
     zoom = 0;
     windowRatio = float(width())/height();
+
     fboRatio    = float(activeImage->fbo->width())/activeImage->fbo->height();
     // openGL window dimensions
     orthographicProjHeight = (1+zoom)/windowRatio;
@@ -1056,11 +1057,13 @@ void GLImage::resetView(){
     // setting the image in the center
     xTranslation = orthographicProjWidth /2;
     yTranslation = orthographicProjHeight/2;
+
 }
 
 void GLImage::resizeGL(int width, int height)
 {
   windowRatio = float(width)/height;
+
   if (isValid()) {
     GLCHK( glViewport(0, 0, width, height) );
 
@@ -1076,14 +1079,14 @@ void GLImage::resizeGL(int width, int height)
     }
   } else
     qDebug() << Q_FUNC_INFO << "invalid context.";
-
   resetView();
+
 }
 
 
 void GLImage::setActiveImage(FBOImageProporties* ptr){
         activeImage = ptr;
-        updateGLNow();
+        paintGL();
 }
 void GLImage::enableShadowRender(bool enable){
         bShadowRender = enable;
@@ -1105,16 +1108,16 @@ void GLImage::updateCornersPosition(QVector2D dc1,QVector2D dc2,QVector2D dc3,QV
     for(int i = 0 ; i < 4 ; i++){
         grungeCornerPositions[i] = cornerPositions[i];
     }
-    updateGL();
+    paintGL();
 }
 void GLImage::selectPerspectiveTransformMethod(int method){
     gui_perspective_mode = method;
-    updateGL();
+    paintGL();
 }
 
 void GLImage::selectUVManipulationMethod(UVManipulationMethods method){
     uvManilupationMethod = method;
-    updateGL();
+    paintGL();
 }
 
 void GLImage::updateCornersWeights(float w1,float w2,float w3,float w4){
@@ -1122,12 +1125,12 @@ void GLImage::updateCornersWeights(float w1,float w2,float w3,float w4){
     cornerWeights.setY( w2);
     cornerWeights.setZ( w3);
     cornerWeights.setW( w4);
-    updateGL();
+    paintGL();
 }
 
 void GLImage::selectSeamlessMode(SeamlessMode mode){
     FBOImageProporties::seamlessMode = mode;
-    updateGL();
+    paintGL();
 }
 
 
@@ -2998,7 +3001,7 @@ void GLImage::wheelEvent(QWheelEvent *event){
     xTranslation =        double(p.x())/width() *orthographicProjWidth  - cursorPhysicalXPosition;
     yTranslation = ((1.0-double(p.y())/height())*orthographicProjHeight - cursorPhysicalYPosition );
 
-    updateGL();
+    paintGL();
 }
 
 void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseButtons buttons)
@@ -3097,7 +3100,7 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
                     if(activeImage->imageType == GRUNGE_TEXTURE) grungeCornerPositions[i] += dmouse;
                     else cornerPositions[i] += dmouse;
                 }
-                repaint();
+                paintGL();
             }
         break;
         // grab corners in perspective correction tool
@@ -3124,7 +3127,7 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
             }// end of if
             if(draggingCorner >=0 && draggingCorner < 4)
                 cornerPositions[draggingCorner] += QVector2D(-dx*(float(orthographicProjWidth)/width()),dy*(float(orthographicProjHeight)/height()));
-            repaint();
+            paintGL();
             }
         break;
         case(UV_SCALE_XY):
@@ -3135,7 +3138,7 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
                 QVector2D dmouse = QVector2D(-dx*(float(orthographicProjWidth)/width()),dy*(float(orthographicProjHeight)/height()));
                 cornerWeights.setX(cornerWeights.x()-dmouse.x());
                 cornerWeights.setY(cornerWeights.y()-dmouse.y());
-                repaint();
+                paintGL();
             }
         break;
         default:;//no actions
@@ -3159,7 +3162,7 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
         setCursor(Qt::UpArrowCursor);
     }
 
-    updateGL();
+    paintGL();
 }
 void GLImage::mousePressEvent(QMouseEvent *event)
 {
@@ -3171,7 +3174,7 @@ void GLImage::mousePressEvent(QMouseEvent *event)
     if (event->buttons() & Qt::RightButton) {
         setCursor(Qt::ClosedHandCursor);
     }
-    updateGL();
+    paintGL();
 
 
     // In case of color picking: emit and stop picking
@@ -3190,7 +3193,7 @@ void GLImage::mouseReleaseEvent(QMouseEvent *event){
     draggingCorner = -1;
     event->accept();
     bSkipProcessing = true;
-    repaint();
+    paintGL();
 }
 
 void GLImage::toggleColorPicking(bool toggle){

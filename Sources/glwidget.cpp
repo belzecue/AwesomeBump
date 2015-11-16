@@ -137,43 +137,43 @@ void GLWidget::resetCameraPosition(){
     newCamera.reset();
     cameraInterpolation = 1.0;
     emit changeCamPositionApplied(false);
-    updateGL();
+    paintGL();
 }
 
 
 void GLWidget::toggleDiffuseView(bool enable){
     bToggleDiffuseView = enable;
-    updateGL();
+    paintGL();
 }
 
 void GLWidget::toggleSpecularView(bool enable){
     bToggleSpecularView = enable;
-    updateGL();
+    paintGL();
 }
 
 void GLWidget::toggleOcclusionView(bool enable){
     bToggleOcclusionView = enable;
-    updateGL();
+    paintGL();
 }
 
 void GLWidget::toggleNormalView(bool enable){
     bToggleNormalView = enable;
-    updateGL();
+    paintGL();
 }
 
 void GLWidget::toggleHeightView(bool enable){
     bToggleHeightView = enable;
-    updateGL();
+    paintGL();
 }
 
 void GLWidget::toggleRoughnessView(bool enable){
     bToggleRoughnessView = enable;
-    updateGL();
+    paintGL();
 
 }
 void GLWidget::toggleMetallicView(bool enable){
     bToggleMetallicView = enable;
-    updateGL();
+    paintGL();
 }
 
 
@@ -478,7 +478,7 @@ void GLWidget::updateGL()
 {
 
 
-     glReadBuffer(GL_BACK);
+    GLCHK(glReadBuffer(GL_BACK));
     // ---------------------------------------------------------
     // Drawing env
     // ---------------------------------------------------------
@@ -733,9 +733,9 @@ void GLWidget::bakeEnviromentalMaps(){
     // ---------------------------------------------------------
     // Drawing env - one pass method
     // ---------------------------------------------------------
-    env_program->bind();
-    m_prefiltered_env_map->bindFBO();
-    glViewport(0,0,512,512);
+    GLCHK(env_program->bind());
+    GLCHK(m_prefiltered_env_map->bindFBO());
+    GLCHK(glViewport(0,0,512,512));
 
     objectMatrix.setToIdentity();
     objectMatrix.scale(1.0);
@@ -754,9 +754,9 @@ void GLWidget::bakeEnviromentalMaps(){
     GLCHK( m_env_map->bind());
     GLCHK( env_mesh->drawMesh(true) );
 
-    glBindFramebuffer   (GL_FRAMEBUFFER, 0);
+    GLCHK(glBindFramebuffer   (GL_FRAMEBUFFER, 0));
 
-    glViewport(0, 0, width(), height()) ;
+    GLCHK(glViewport(0, 0, width(), height())) ;
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -808,7 +808,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     }
 
 
-    updateGL();
+    paintGL();
     // capture the pixel color if material preview is enabled
     if((event->buttons() & Qt::LeftButton) && keyPressed == KEY_SHOW_MATERIALS){
 
@@ -885,7 +885,7 @@ void GLWidget::wheelEvent(QWheelEvent *event){
     int numDegrees = -event->delta();
     camera.mouseWheelMove((numDegrees));
 
-    updateGL();
+    paintGL();
 }
 
 void GLWidget::dropEvent(QDropEvent *event)
@@ -998,7 +998,7 @@ bool GLWidget::loadMeshFile(const QString &fileName, bool bAddExtension)
         delete new_mesh;
     }
 
-    updateGL();
+    paintGL();
     return true;
 }
 
@@ -1023,14 +1023,14 @@ void GLWidget::chooseSkyBox(QString cubeMapName,bool bFirstTime){
         qWarning() << "Cannot load cube map: check if images listed above exist.";
     }
     // skip this when loading first cube map
-    if(!bFirstTime)updateGL();
+    if(!bFirstTime)paintGL();
     else qDebug() << "Skipping glWidget repainting during first Env. maps. load.";
 }
 
 void GLWidget::updatePerformanceSettings(Display3DSettings settings){
     qDebug() << "Changing 3D settings";
     display3Dparameters = settings;
-    repaint();
+    paintGL();
 }
 
 
