@@ -21,6 +21,8 @@ GLWidgetBase::GLWidgetBase(const QGLFormat& format, QWidget *parent, QOpenGLWidg
     centerCamCursor = QCursor(QPixmap(":/resources/centerCamCursor.png"));
     wrapMouse = true;
 
+
+
 }
 
 GLWidgetBase::~GLWidgetBase()

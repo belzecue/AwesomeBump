@@ -23,10 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
     glWidget         = new GLWidget(this,glImage);
 
 
-    connect(glImage,SIGNAL(readyGL()),this,SLOT(initializeImages()));
-    connect(glImage,SIGNAL(rendered()),this,SLOT(initializeImages()));
+    //connect(glImage,SIGNAL(readyGL()),this,SLOT(initializeImages()));
+    //connect(glImage,SIGNAL(rendered()),this,SLOT(initializeImages()));
 
-    connect(glWidget,SIGNAL(readyGL()),this,SLOT(initialize3DWidget()));
+    //connect(glWidget,SIGNAL(readyGL()),this,SLOT(initialize3DWidget()));
 
     diffuseImageProp  = new FormImageProp(this,glImage);
     normalImageProp   = new FormImageProp(this,glImage);
@@ -1127,13 +1127,13 @@ void MainWindow::initializeImages(){
     qDebug() << "MainWindow::Initialization";
     QCoreApplication::processEvents();
     initializeGL();
-    replotAllImages();
+    //replotAllImages();
     // SSAO recalculation
-    FBOImageProporties* lastActive = glImage->getActiveImage();
+    //FBOImageProporties* lastActive = glImage->getActiveImage();
 
-    updateImage(OCCLUSION_TEXTURE);
+    //updateImage(OCCLUSION_TEXTURE);
     //glImage->update();
-    glImage->setActiveImage(lastActive);
+    //glImage->setActiveImage(lastActive);
 
 }
 

@@ -138,7 +138,8 @@ void GLImage::initializeGL()
     GLCHK( glEnable(GL_MULTISAMPLE) );
     GLCHK( glEnable(GL_DEPTH_TEST) );
 
-
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+            f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     QVector<QString> filters_list;
     filters_list.push_back("mode_normal_filter");
@@ -311,6 +312,29 @@ void GLImage::initializeGL()
         auxFBO2BMLevels[i] = NULL;
     }
     paintFBO   = NULL;
+
+
+    // Loading default (initial) textures
+    QImage image = QImage(QString(":/resources/logo_D.png"));
+    targetImageDiffuse   ->init(image);
+    image = QImage(QString(":/resources/logo_N.png"));
+    targetImageNormal    ->init(image);
+    image = QImage(QString(":/resources/logo_D.png"));
+    targetImageSpecular  ->init(image);
+    image = QImage(QString(":/resources/logo_H.png"));
+    targetImageHeight    ->init(image);
+    image = QImage(QString(":/resources/logo_O.png"));
+    targetImageOcclusion ->init(image);
+    image = QImage(QString(":/resources/logo_R.png"));
+    targetImageRoughness ->init(image);
+    image = QImage(QString(":/resources/logo_M.png"));
+    targetImageMetallic  ->init(image);
+    image = QImage(QString(":/resources/logo_R.png"));
+    targetImageGrunge    ->init(image);
+    image = QImage(QString(":/resources/logo_R.png"));
+    targetImageMaterial  ->init(image);
+
+    activeImage = targetImageDiffuse;
 
     emit readyGL();
 }

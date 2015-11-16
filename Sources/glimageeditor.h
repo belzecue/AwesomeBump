@@ -263,11 +263,12 @@ public:
 
     void updateProgramUniforms(int step);
 //! [3]
+    FBOImageProporties* activeImage;
 private:
     void makeScreenQuad();
 
     QOpenGLShaderProgram *program;
-    FBOImageProporties* activeImage;
+
     QGLFramebufferObject* averageColorFBO; // small FBO used for calculation of average color
     QGLFramebufferObject* samplerFBO1; // FBO with size 1024x1024
     QGLFramebufferObject* samplerFBO2; // FBO with size 1024x1024 used for different processing
