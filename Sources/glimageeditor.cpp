@@ -129,7 +129,7 @@ void GLImage::initializeGL()
 {
 
     initializeOpenGLFunctions();
-
+    qDebug() << "Initializing the texture 2D window widget.";
     qDebug() << "calling " << Q_FUNC_INFO;
     
     QColor clearColor = QColor::fromCmykF(0.79, 0.79, 0.79, 0.0).dark();

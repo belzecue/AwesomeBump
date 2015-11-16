@@ -77,6 +77,7 @@ GLWidget::GLWidget(QWidget *parent, QOpenGLWidget * shareWidget)
 
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setSizePolicy(sizePolicy);
+
 }
 
 GLWidget::~GLWidget()
@@ -179,6 +180,7 @@ void GLWidget::toggleMetallicView(bool enable){
 void GLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
+    qDebug() << "Initializing the 3D window widget.";
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     makeCurrent();
     QColor bgColor = QColor::fromCmykF(0.79, 0.79, 0.79, 0.0).dark();
@@ -444,11 +446,11 @@ void GLWidget::initializeGL()
 
 
     GLCHK( lensFlareColorsTexture = bindTexture(QImage(":/resources/lenscolor.png")) );
-    qDebug() << "Loading lensColors texture: (id=" << lensFlareColorsTexture << ")";
+    qDebug() << "Loading lensColors texture: (id=" << lensFlareColorsTexture->textureId() << ")";
     GLCHK( lensDirtTexture = bindTexture(QImage(":/resources/lensdirt.png")) );
-    qDebug() << "Loading lensDirt texture: (id=" << lensDirtTexture << ")";
+    qDebug() << "Loading lensDirt texture: (id=" << lensDirtTexture->textureId() << ")";
     GLCHK( lensStarTexture = bindTexture(QImage(":/resources/lensstar.png")) );
-    qDebug() << "Loading lensDirt texture: (id=" << lensStarTexture << ")";
+    qDebug() << "Loading lensDirt texture: (id=" << lensStarTexture->textureId() << ")";
 
 
 
@@ -1028,7 +1030,7 @@ void GLWidget::chooseSkyBox(QString cubeMapName,bool bFirstTime){
 void GLWidget::updatePerformanceSettings(Display3DSettings settings){
     qDebug() << "Changing 3D settings";
     display3Dparameters = settings;
-    updateGL();
+    repaint();
 }
 
 

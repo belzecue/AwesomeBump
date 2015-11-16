@@ -20,6 +20,7 @@ GLWidgetBase::GLWidgetBase(const QGLFormat& format, QWidget *parent, QOpenGLWidg
     setFocusPolicy(Qt::ClickFocus);
     centerCamCursor = QCursor(QPixmap(":/resources/centerCamCursor.png"));
     wrapMouse = true;
+
 }
 
 GLWidgetBase::~GLWidgetBase()
@@ -37,6 +38,7 @@ void GLWidgetBase::updateGLNow()
 
 void GLWidgetBase::paintGL()
 {
+
     if(updateIsQueued == false)
     {
         // Queue the updating the OpenGL Widget

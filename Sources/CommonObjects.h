@@ -811,7 +811,7 @@ public:
         qDebug() << Q_FUNC_INFO;
 
         glWidget_ptr->makeCurrent();
-        if(glIsTexture(scr_tex_id->textureId())) delete (scr_tex_id);
+        if(scr_tex_id != NULL)if(glIsTexture(scr_tex_id->textureId())) delete (scr_tex_id);
         scr_tex_id     = new QOpenGLTexture(image);
         scr_tex_width  = image.width();
         scr_tex_height = image.height();
@@ -834,7 +834,7 @@ public:
 
     void updateSrcTexId(QGLFramebufferObject* in_ref_fbo){
         glWidget_ptr->makeCurrent();
-        if(glIsTexture(scr_tex_id->textureId())) delete scr_tex_id;
+        if(scr_tex_id != NULL)if(glIsTexture(scr_tex_id->textureId())) delete scr_tex_id;
         QImage image = in_ref_fbo->toImage();
         scr_tex_id   = new QOpenGLTexture(image);
 
@@ -863,8 +863,8 @@ public:
             qDebug() << Q_FUNC_INFO;
             glWidget_ptr->makeCurrent();
 
-            if(glIsTexture(normalMixerInputTexId->textureId())) GLCHK(delete normalMixerInputTexId);
-            if(glIsTexture(scr_tex_id->textureId())) GLCHK(delete scr_tex_id);
+            if(normalMixerInputTexId != NULL)if(glIsTexture(normalMixerInputTexId->textureId())) GLCHK(delete normalMixerInputTexId);
+            if(scr_tex_id != NULL)if(glIsTexture(scr_tex_id->textureId())) GLCHK(delete scr_tex_id);
             normalMixerInputTexId = NULL;
             scr_tex_id   = NULL;
             glWidget_ptr = NULL;

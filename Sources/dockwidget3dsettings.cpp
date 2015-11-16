@@ -7,6 +7,7 @@ DockWidget3DSettings::DockWidget3DSettings(QWidget *parent, GLWidget* ptr_gl) :
     ui(new Ui::DockWidget3DSettings)
 {
     ui->setupUi(this);
+    qDebug() << "Initializing DockWidget3DSettings widget.";
     close();
     setContentsMargins(0,0,0,0);
     //setWindowFlags(Qt::Widget);
@@ -59,9 +60,7 @@ DockWidget3DSettings::DockWidget3DSettings(QWidget *parent, GLWidget* ptr_gl) :
         }
     }// end of for
     // setting cube map for glWidget
-    ptr_glWidget->chooseSkyBox(ui->comboBoxSkyBox->currentText(),true);
-
-
+    //ptr_glWidget->chooseSkyBox(ui->comboBoxSkyBox->currentText(),true);
 
 }
 QSize DockWidget3DSettings::sizeHint() const
@@ -137,6 +136,10 @@ void DockWidget3DSettings::loadSettings(){
     ui->comboBoxPerformanceNoRays   ->setCurrentIndex(settings.value("noPBRRays",0).toInt());
     ui->comboBoxPerformanceNoTessSub->setCurrentIndex(settings.value("noTessSubdivision",0).toInt());
     updateSettings();
+}
+
+QString DockWidget3DSettings::currentSkybox(){
+    return ui->comboBoxSkyBox->currentText();
 }
 
 DockWidget3DSettings::~DockWidget3DSettings()

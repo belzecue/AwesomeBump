@@ -23,8 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
     glWidget         = new GLWidget(this,glImage);
 
 
-
+    connect(glImage,SIGNAL(readyGL()),this,SLOT(initializeImages()));
     connect(glImage,SIGNAL(rendered()),this,SLOT(initializeImages()));
+
+    connect(glWidget,SIGNAL(readyGL()),this,SLOT(initialize3DWidget()));
 
     diffuseImageProp  = new FormImageProp(this,glImage);
     normalImageProp   = new FormImageProp(this,glImage);
@@ -194,7 +196,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton3DSettings ,SIGNAL(toggled(bool)),dock3Dsettings,SLOT(setVisible(bool)));
 
 
-    ui->verticalLayout3DImage->addWidget(glWidget);
+    //ui->verticalLayout3DImage->addWidget(glWidget);
     ui->verticalLayout2DImage->addWidget(glImage);
 
 
@@ -424,14 +426,14 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "Supported GUI styles: " << guiStyleList.join(", ");
     ui->comboBoxGUIStyle->addItems(guiStyleList);
 
-    qDebug() << "Loading settings:" ;
+    //qDebug() << "Loading settings:" ;
     // Now we can load settings
 
 
 
 
     loadSettings();
-
+    /*
 
     // Loading default (initial) textures
     diffuseImageProp   ->setImage(QImage(QString(":/resources/logo_D.png")));
@@ -457,7 +459,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Setting the active image
     glImage->setActiveImage(diffuseImageProp->getImageProporties());
-
+    */
 
     aboutAction = new QAction(QIcon(":/resources/cube.png"), tr("&About %1").arg(qApp->applicationName()), this);
     aboutAction->setToolTip(tr("Show information about AwesomeBump"));
@@ -492,6 +494,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QAction *action = ui->toolBar->toggleViewAction();
     ui->menubar->addAction(action);
+    qDebug() << "Finish constructor";
 
 }
 
@@ -545,6 +548,9 @@ void MainWindow::resizeEvent(QResizeEvent* event){
 void MainWindow::showEvent(QShowEvent* event){
   QWidget::showEvent( event );
   qDebug() << "calling" << Q_FUNC_INFO;
+  qDebug() << "calling" << Q_FUNC_INFO;
+  qDebug() << "calling" << Q_FUNC_INFO;
+  qDebug() << "calling" << Q_FUNC_INFO;
   replotAllImages();
 }
 
@@ -589,7 +595,7 @@ void MainWindow::replotAllImages(){
 
     glImage->setActiveImage(lastActive);
     glWidget->update();
-    
+    /*
     QGLContext* glContext = (QGLContext *) glWidget->context();
     GLCHK( glContext->makeCurrent() );
 
@@ -612,6 +618,7 @@ void MainWindow::replotAllImages(){
 
     statusLabel->setText(menu_text);
 #endif
+    */
 }
 
 
@@ -1065,32 +1072,50 @@ void MainWindow::updateImageInformation(){
 void MainWindow::initializeGL(){  
     static bool one_time = false;
     // Context is vallid at this moment
+    qDebug() << "calling asd" << Q_FUNC_INFO;
     if (!one_time){
       one_time = true;
 
       qDebug() << "calling" << Q_FUNC_INFO;
       
       // Loading default (initial) textures
-      diffuseImageProp  ->setImage(QImage(QString(":/resources/logo_D.png")));
-      normalImageProp   ->setImage(QImage(QString(":/resources/logo_N.png")));
-      specularImageProp ->setImage(QImage(QString(":/resources/logo_D.png")));
-      heightImageProp   ->setImage(QImage(QString(":/resources/logo_H.png")));
-      occlusionImageProp->setImage(QImage(QString(":/resources/logo_O.png")));
-      roughnessImageProp->setImage(QImage(QString(":/resources/logo_R.png")));
-      metallicImageProp ->setImage(QImage(QString(":/resources/logo_M.png")));
-      grungeImageProp   ->setImage(QImage(QString(":/resources/logo_R.png")));
+      diffuseImageProp   ->setImage(QImage(QString(":/resources/logo_D.png")));
 
-      diffuseImageProp  ->setImageName(ui->lineEditOutputName->text());
-      normalImageProp   ->setImageName(ui->lineEditOutputName->text());
-      heightImageProp   ->setImageName(ui->lineEditOutputName->text());
-      specularImageProp ->setImageName(ui->lineEditOutputName->text());
-      occlusionImageProp->setImageName(ui->lineEditOutputName->text());
-      roughnessImageProp->setImageName(ui->lineEditOutputName->text());
-      metallicImageProp ->setImageName(ui->lineEditOutputName->text());
-      grungeImageProp   ->setImageName(ui->lineEditOutputName->text());
+      normalImageProp    ->setImage(QImage(QString(":/resources/logo_N.png")));
+      specularImageProp  ->setImage(QImage(QString(":/resources/logo_D.png")));
+      heightImageProp    ->setImage(QImage(QString(":/resources/logo_H.png")));
+      occlusionImageProp ->setImage(QImage(QString(":/resources/logo_O.png")));
+      roughnessImageProp ->setImage(QImage(QString(":/resources/logo_R.png")));
+      metallicImageProp  ->setImage(QImage(QString(":/resources/logo_M.png")));
+      grungeImageProp    ->setImage(QImage(QString(":/resources/logo_R.png")));
+      materialManager    ->setImage(QImage(QString(":/resources/logo_R.png")));
+
+
+      diffuseImageProp   ->setImageName(ui->lineEditOutputName->text());
+      normalImageProp    ->setImageName(ui->lineEditOutputName->text());
+      heightImageProp    ->setImageName(ui->lineEditOutputName->text());
+      specularImageProp  ->setImageName(ui->lineEditOutputName->text());
+      occlusionImageProp ->setImageName(ui->lineEditOutputName->text());
+      roughnessImageProp ->setImageName(ui->lineEditOutputName->text());
+      metallicImageProp  ->setImageName(ui->lineEditOutputName->text());
+      grungeImageProp    ->setImageName(ui->lineEditOutputName->text());
+
       // Setting the active image
       glImage->setActiveImage(diffuseImageProp->getImageProporties());
+
     }
+}
+
+void MainWindow::initialize3DWidget(){
+    static bool one_time = false;
+
+    if (one_time) return;
+      one_time = true;
+
+     // Initialize skybox
+     glWidget->chooseSkyBox(dock3Dsettings->currentSkybox(),true);
+
+
 }
 
 void MainWindow::initializeImages(){
@@ -1101,7 +1126,7 @@ void MainWindow::initializeImages(){
 
     qDebug() << "MainWindow::Initialization";
     QCoreApplication::processEvents();
-
+    initializeGL();
     replotAllImages();
     // SSAO recalculation
     FBOImageProporties* lastActive = glImage->getActiveImage();
@@ -1972,7 +1997,7 @@ void MainWindow::loadSettings(){
 
     // UV Settings
     ui->comboBoxSeamlessMode->setCurrentIndex(settings.value("uv_tiling_type",0).toInt());
-    selectSeamlessMode(ui->comboBoxSeamlessMode->currentIndex());
+    //selectSeamlessMode(ui->comboBoxSeamlessMode->currentIndex());
     ui->horizontalSliderMakeSeamlessRadius->setValue(settings.value("uv_tiling_radius",50).toInt());
     ui->radioButtonMirrorModeX->setChecked(settings.value("uv_tiling_mirror_x",false).toBool());
     ui->radioButtonMirrorModeY->setChecked(settings.value("uv_tiling_mirror_y",false).toBool());
@@ -1996,7 +2021,9 @@ void MainWindow::loadSettings(){
     ui->spinBoxFontSize->setValue(settings.value("font_size",10).toInt());
     ui->checkBoxToggleMouseLoop->setChecked(settings.value("mouse_loop",true).toBool());
 
+
     dock3Dsettings->loadSettings();
+
     updateSliders();
 
 

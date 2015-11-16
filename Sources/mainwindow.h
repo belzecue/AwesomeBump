@@ -42,6 +42,7 @@ public slots:
     void about();
   
     void initializeGL();
+    void initialize3DWidget();
     void initializeImages();
 
     void saveImages();
