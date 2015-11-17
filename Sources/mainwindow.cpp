@@ -23,9 +23,9 @@ MainWindow::MainWindow(QWidget *parent) :
     glWidget         = new GLWidget(this,glImage);
 
 
-    //connect(glImage,SIGNAL(readyGL()),this,SLOT(initializeImages()));
-    //connect(glImage,SIGNAL(rendered()),this,SLOT(initializeImages()));
+    connect(glImage,SIGNAL(readyGL()),this,SLOT(initializeImages()));
 
+    //connect(glImage,SIGNAL(rendered()),this,SLOT(initializeImages()));
     //connect(glWidget,SIGNAL(readyGL()),this,SLOT(initialize3DWidget()));
 
     diffuseImageProp  = new FormImageProp(this,glImage);
@@ -594,7 +594,7 @@ void MainWindow::replotAllImages(){
     glImage->enableShadowRender(false);
 
     glImage->setActiveImage(lastActive);
-    glWidget->update();
+    glWidget->repaint();
     /*
     QGLContext* glContext = (QGLContext *) glWidget->context();
     GLCHK( glContext->makeCurrent() );
@@ -1113,6 +1113,7 @@ void MainWindow::initialize3DWidget(){
       one_time = true;
 
      // Initialize skybox
+
      glWidget->chooseSkyBox(dock3Dsettings->currentSkybox(),true);
 
 
@@ -1126,7 +1127,7 @@ void MainWindow::initializeImages(){
 
     qDebug() << "MainWindow::Initialization";
     QCoreApplication::processEvents();
-    initializeGL();
+    //initializeGL();
     //replotAllImages();
     // SSAO recalculation
     //FBOImageProporties* lastActive = glImage->getActiveImage();

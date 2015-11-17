@@ -138,9 +138,6 @@ void GLImage::initializeGL()
     GLCHK( glEnable(GL_MULTISAMPLE) );
     GLCHK( glEnable(GL_DEPTH_TEST) );
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-            f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
     QVector<QString> filters_list;
     filters_list.push_back("mode_normal_filter");
     filters_list.push_back("mode_height_to_normal");
@@ -335,19 +332,22 @@ void GLImage::initializeGL()
     targetImageMaterial  ->init(image);
 
     activeImage = targetImageDiffuse;
-
+    bInitialized = true;
     emit readyGL();
 }
 
 void GLImage::updateGL()
 {
+    makeCurrent();
 
+    /*
     // Perform filters on images and render the final result to renderFBO
     // avoid rendering function if there is rendered something already
     if(!bSkipProcessing && !bRendering){        
         bRendering = true;
         render();
     }
+    */
 
 
     bSkipProcessing = false;
@@ -381,12 +381,14 @@ void GLImage::updateGL()
         #endif
 
         // Displaying new image
-        activeFBO->bindDefault();
+        //activeFBO->bindDefault();
         program->setUniformValue("quad_draw_mode", 1);
 
         GLCHK( glViewport(0,0,width(),height()) );
         GLCHK( glActiveTexture(GL_TEXTURE0) );
-        GLCHK( glBindTexture(GL_TEXTURE_2D, activeFBO->texture()) );
+       // GLCHK( glBindTexture(GL_TEXTURE_2D, activeFBO->texture()) );
+        GLCHK( glBindTexture(GL_TEXTURE_2D, activeImage->scr_tex_id->textureId()) );
+
 
         QMatrix4x4 m;
         m.ortho(0,orthographicProjWidth,0,orthographicProjHeight,-1,1);
@@ -397,6 +399,7 @@ void GLImage::updateGL()
         GLCHK( program->setUniformValue("material_id", int(-1)) );
         GLCHK( glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, 0) );
         GLCHK( program->setUniformValue("quad_draw_mode", int(0)) );
+
     }
 
 }
@@ -405,7 +408,7 @@ void GLImage::updateGL()
 
 void GLImage::render(){
 
-
+    makeCurrent();
     if (!activeImage) return;
     if ( activeImage->fbo){ // since grunge map can be different we need to calculate ratio each time
       fboRatio = float(activeImage->fbo->width())/activeImage->fbo->height();
@@ -1110,7 +1113,7 @@ void GLImage::resizeGL(int width, int height)
 
 void GLImage::setActiveImage(FBOImageProporties* ptr){
         activeImage = ptr;
-        paintGL();
+        repaint();
 }
 void GLImage::enableShadowRender(bool enable){
         bShadowRender = enable;
@@ -1132,16 +1135,16 @@ void GLImage::updateCornersPosition(QVector2D dc1,QVector2D dc2,QVector2D dc3,QV
     for(int i = 0 ; i < 4 ; i++){
         grungeCornerPositions[i] = cornerPositions[i];
     }
-    paintGL();
+    repaint();
 }
 void GLImage::selectPerspectiveTransformMethod(int method){
     gui_perspective_mode = method;
-    paintGL();
+    repaint();
 }
 
 void GLImage::selectUVManipulationMethod(UVManipulationMethods method){
     uvManilupationMethod = method;
-    paintGL();
+    repaint();
 }
 
 void GLImage::updateCornersWeights(float w1,float w2,float w3,float w4){
@@ -1149,12 +1152,12 @@ void GLImage::updateCornersWeights(float w1,float w2,float w3,float w4){
     cornerWeights.setY( w2);
     cornerWeights.setZ( w3);
     cornerWeights.setW( w4);
-    paintGL();
+    repaint();
 }
 
 void GLImage::selectSeamlessMode(SeamlessMode mode){
     FBOImageProporties::seamlessMode = mode;
-    paintGL();
+    repaint();
 }
 
 
@@ -3025,7 +3028,7 @@ void GLImage::wheelEvent(QWheelEvent *event){
     xTranslation =        double(p.x())/width() *orthographicProjWidth  - cursorPhysicalXPosition;
     yTranslation = ((1.0-double(p.y())/height())*orthographicProjHeight - cursorPhysicalYPosition );
 
-    paintGL();
+    repaint();
 }
 
 void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseButtons buttons)
@@ -3124,7 +3127,6 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
                     if(activeImage->imageType == GRUNGE_TEXTURE) grungeCornerPositions[i] += dmouse;
                     else cornerPositions[i] += dmouse;
                 }
-                paintGL();
             }
         break;
         // grab corners in perspective correction tool
@@ -3151,7 +3153,7 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
             }// end of if
             if(draggingCorner >=0 && draggingCorner < 4)
                 cornerPositions[draggingCorner] += QVector2D(-dx*(float(orthographicProjWidth)/width()),dy*(float(orthographicProjHeight)/height()));
-            paintGL();
+
             }
         break;
         case(UV_SCALE_XY):
@@ -3162,7 +3164,7 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
                 QVector2D dmouse = QVector2D(-dx*(float(orthographicProjWidth)/width()),dy*(float(orthographicProjHeight)/height()));
                 cornerWeights.setX(cornerWeights.x()-dmouse.x());
                 cornerWeights.setY(cornerWeights.y()-dmouse.y());
-                paintGL();
+
             }
         break;
         default:;//no actions
@@ -3186,7 +3188,7 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
         setCursor(Qt::UpArrowCursor);
     }
 
-    paintGL();
+    repaint();
 }
 void GLImage::mousePressEvent(QMouseEvent *event)
 {
@@ -3198,7 +3200,7 @@ void GLImage::mousePressEvent(QMouseEvent *event)
     if (event->buttons() & Qt::RightButton) {
         setCursor(Qt::ClosedHandCursor);
     }
-    paintGL();
+    repaint();
 
 
     // In case of color picking: emit and stop picking
@@ -3217,7 +3219,7 @@ void GLImage::mouseReleaseEvent(QMouseEvent *event){
     draggingCorner = -1;
     event->accept();
     bSkipProcessing = true;
-    paintGL();
+    repaint();
 }
 
 void GLImage::toggleColorPicking(bool toggle){

@@ -13,13 +13,14 @@ public:
                  QOpenGLWidget *shareWidget=0);
     ~GLWidgetBase();
 
+
 public:
     // Instead of updating the opengl area immediatly, this queues drawing and
     // makes sure, to do it only once until updateGLNow was called.
     void paintGL() Q_DECL_FINAL Q_DECL_OVERRIDE;
 
     void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-
+    virtual void updateGL() = 0;
 
     void mouseMoveEvent(QMouseEvent *event) Q_DECL_FINAL Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent *event) ;
@@ -57,6 +58,7 @@ private:
 protected:
     Qt::Key keyPressed;
     QCursor centerCamCursor;
+    bool bInitialized;
 };
 
 #endif // GLWIDGETBASE_H

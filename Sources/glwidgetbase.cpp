@@ -19,8 +19,8 @@ GLWidgetBase::GLWidgetBase(const QGLFormat& format, QWidget *parent, QOpenGLWidg
     setMouseTracking(true);
     setFocusPolicy(Qt::ClickFocus);
     centerCamCursor = QCursor(QPixmap(":/resources/centerCamCursor.png"));
-    wrapMouse = true;
-
+    wrapMouse    = true;
+    bInitialized = false;
 
 
 }
@@ -35,11 +35,18 @@ void GLWidgetBase::updateGLNow()
     updateIsQueued = false;
 
     // Call the default updateGL implementation, which will call the paint method
+
     QOpenGLWidget::paintGL();
 }
 
 void GLWidgetBase::paintGL()
 {
+    if(!bInitialized) return;
+
+    updateGL();
+
+
+
 
     if(updateIsQueued == false)
     {
@@ -52,8 +59,12 @@ void GLWidgetBase::paintGL()
     // has to be done multiple times for the end result to look correct.
     // This workaround passes every drawcall, until mouse events are received for
     // the first time.
-    if(!eventLoopStarted)
+    if(!eventLoopStarted){
+
         updateGLNow();
+    }
+
+
 }
 
 void GLWidgetBase::mousePressEvent(QMouseEvent *event)
@@ -86,11 +97,13 @@ void GLWidgetBase::mouseMoveEvent(QMouseEvent *event)
     dy += event->y() - lastCursorPos.y();
     buttons |= event->buttons();
 
+
     lastCursorPos = event->pos();
 
     // Don't handle mouse movements directly, instead accumulate all queued mouse
     // movements and execute all at once.
     handleMovement();
+
 }
 
 void GLWidgetBase::handleMovement()

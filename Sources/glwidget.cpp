@@ -471,13 +471,14 @@ void GLWidget::initializeGL()
     m_prefiltered_env_map = new GLTextureCube(512);
 
     resizeFBOs();
+    bInitialized = true;
     emit readyGL();
 }
 
 void GLWidget::updateGL()
 {
 
-
+    return;
     GLCHK(glReadBuffer(GL_BACK));
     // ---------------------------------------------------------
     // Drawing env
