@@ -547,17 +547,13 @@ void MainWindow::resizeEvent(QResizeEvent* event){
 
 void MainWindow::showEvent(QShowEvent* event){
   QWidget::showEvent( event );
-  qDebug() << "calling" << Q_FUNC_INFO;
-  qDebug() << "calling" << Q_FUNC_INFO;
-  qDebug() << "calling" << Q_FUNC_INFO;
-  qDebug() << "calling" << Q_FUNC_INFO;
   replotAllImages();
 }
 
 void MainWindow::replotAllImages(){
     FBOImageProporties* lastActive = glImage->getActiveImage();
     glImage->enableShadowRender(true);
-
+    qDebug() << "Replotting all the images";
     // skip grunge map if conversion is enabled
     if(glImage->getConversionType() != CONVERT_FROM_D_TO_O){        
         updateImage(GRUNGE_TEXTURE);
@@ -594,6 +590,7 @@ void MainWindow::replotAllImages(){
     glImage->enableShadowRender(false);
 
     glImage->setActiveImage(lastActive);
+
     glWidget->repaint();
     /*
     QGLContext* glContext = (QGLContext *) glWidget->context();
@@ -1180,6 +1177,7 @@ void MainWindow::updateImage(int tType){
             return;
     }
     //glImage->toggleColorPicking(false);
+
     glWidget->repaint();
 }
 

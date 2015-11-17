@@ -338,16 +338,16 @@ void GLImage::initializeGL()
 
 void GLImage::updateGL()
 {
-    makeCurrent();
 
-    /*
+
+    qDebug() << "Doing plot:" << PostfixNames::getTextureName(activeImage->imageType);
     // Perform filters on images and render the final result to renderFBO
     // avoid rendering function if there is rendered something already
     if(!bSkipProcessing && !bRendering){        
         bRendering = true;
         render();
     }
-    */
+    makeCurrent();
 
 
     bSkipProcessing = false;
@@ -381,13 +381,13 @@ void GLImage::updateGL()
         #endif
 
         // Displaying new image
-        //activeFBO->bindDefault();
+       // activeFBO->bindDefault();
         program->setUniformValue("quad_draw_mode", 1);
 
         GLCHK( glViewport(0,0,width(),height()) );
         GLCHK( glActiveTexture(GL_TEXTURE0) );
-       // GLCHK( glBindTexture(GL_TEXTURE_2D, activeFBO->texture()) );
-        GLCHK( glBindTexture(GL_TEXTURE_2D, activeImage->scr_tex_id->textureId()) );
+        GLCHK( glBindTexture(GL_TEXTURE_2D, activeFBO->texture()) );
+       // GLCHK( glBindTexture(GL_TEXTURE_2D, activeImage->scr_tex_id->textureId()) );
 
 
         QMatrix4x4 m;
@@ -409,6 +409,8 @@ void GLImage::updateGL()
 void GLImage::render(){
 
     makeCurrent();
+
+
     if (!activeImage) return;
     if ( activeImage->fbo){ // since grunge map can be different we need to calculate ratio each time
       fboRatio = float(activeImage->fbo->width())/activeImage->fbo->height();
@@ -2992,7 +2994,7 @@ void GLImage::updateMousePosition(){
     QPoint p = mapFromGlobal(QCursor::pos());
     cursorPhysicalXPosition =       double(p.x())/width() * orthographicProjWidth  - xTranslation;
     cursorPhysicalYPosition = (1.0-double(p.y())/height())* orthographicProjHeight - yTranslation;
-    bSkipProcessing = true;    
+    bSkipProcessing = true;
 }
 
 void GLImage::wheelEvent(QWheelEvent *event){
