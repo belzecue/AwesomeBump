@@ -106,7 +106,7 @@ signals:
 
 protected:
     void initializeGL();
-    void updateGL();
+    void paintGL();
     void resizeGL(int width, int height);
     
     void mousePressEvent(QMouseEvent *event);
@@ -195,17 +195,19 @@ protected:
     void resizeFBOs();
     void deleteFBOs();
     void applyNormalFilter(GLuint input_tex);
-    void copyTexToFBO(GLuint input_tex,QGLFramebufferObject* dst);
+    void copyTexToFBO(GLuint input_tex,QOpenGLFramebufferObject* dst);
     void applyGaussFilter(GLuint input_tex,
-                          QGLFramebufferObject* auxFBO,
-                          QGLFramebufferObject* outputFBO, float radius = 10.0);
+                          QOpenGLFramebufferObject *auxFBO,
+                          QOpenGLFramebufferObject *outputFBO, float radius = 10.0);
     void applyDofFilter(GLuint input_tex,
-                        QGLFramebufferObject* outputFBO);
-    void applyGlowFilter(QGLFramebufferObject* outputFBO);
-    void applyToneFilter(GLuint input_tex,QGLFramebufferObject* outputFBO);
-    void applyLensFlaresFilter(GLuint input_tex,QGLFramebufferObject* outputFBO);
+                        QOpenGLFramebufferObject* outputFBO);
+    void applyGlowFilter(QOpenGLFramebufferObject* outputFBO);
+    void applyToneFilter(GLuint input_tex,QOpenGLFramebufferObject* outputFBO);
+    void applyLensFlaresFilter(GLuint input_tex,QOpenGLFramebufferObject* outputFBO);
 public:
     static QDir* recentMeshDir;
+private:
+    bool bResizeFBOs;
 };
 //! [3]
 

@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
 #endif
 
     QGLFormat::setDefaultFormat(glFormat);
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
 
     //qInstallMessageHandler(customMessageHandler);

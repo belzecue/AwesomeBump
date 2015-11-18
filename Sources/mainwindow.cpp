@@ -25,8 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(glImage,SIGNAL(readyGL()),this,SLOT(initializeImages()));
 
-    //connect(glImage,SIGNAL(rendered()),this,SLOT(initializeImages()));
-    //connect(glWidget,SIGNAL(readyGL()),this,SLOT(initialize3DWidget()));
+    connect(glImage,SIGNAL(rendered()),this,SLOT(initializeImages()));
+    connect(glWidget,SIGNAL(readyGL()),this,SLOT(initialize3DWidget()));
 
     diffuseImageProp  = new FormImageProp(this,glImage);
     normalImageProp   = new FormImageProp(this,glImage);
@@ -176,6 +176,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // ------------------------------------------------------
     ui->setupUi(this);
     ui->statusbar->addWidget(statusLabel);
+
 
     // Settings container
     settingsContainer = new FormSettingsContainer;
@@ -547,6 +548,7 @@ void MainWindow::resizeEvent(QResizeEvent* event){
 
 void MainWindow::showEvent(QShowEvent* event){
   QWidget::showEvent( event );
+  qDebug() << "calling " << Q_FUNC_INFO;
   replotAllImages();
 }
 
@@ -559,13 +561,13 @@ void MainWindow::replotAllImages(){
         updateImage(GRUNGE_TEXTURE);
         //glImage->update();
     }
-
+    QCoreApplication::processEvents();
     updateImage(DIFFUSE_TEXTURE);
     //glImage->update();
-
+    QCoreApplication::processEvents();
     updateImage(ROUGHNESS_TEXTURE);
     //glImage->update();
-
+    QCoreApplication::processEvents();
     updateImage(METALLIC_TEXTURE);
    // glImage->update();
 
@@ -1124,14 +1126,14 @@ void MainWindow::initializeImages(){
 
     qDebug() << "MainWindow::Initialization";
     QCoreApplication::processEvents();
-    //initializeGL();
-    //replotAllImages();
+    initializeGL();
+    replotAllImages();
     // SSAO recalculation
-    //FBOImageProporties* lastActive = glImage->getActiveImage();
+    FBOImageProporties* lastActive = glImage->getActiveImage();
 
-    //updateImage(OCCLUSION_TEXTURE);
+    updateImage(OCCLUSION_TEXTURE);
     //glImage->update();
-    //glImage->setActiveImage(lastActive);
+    glImage->setActiveImage(lastActive);
 
 }
 
@@ -1178,7 +1180,7 @@ void MainWindow::updateImage(int tType){
     }
     //glImage->toggleColorPicking(false);
 
-    glWidget->repaint();
+    //glWidget->repaint();
 }
 
 void MainWindow::changeWidth (int size){

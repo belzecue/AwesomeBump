@@ -812,7 +812,8 @@ public:
 
         glWidget_ptr->makeCurrent();
         if(scr_tex_id != NULL)if(glIsTexture(scr_tex_id->textureId())) delete (scr_tex_id);
-        scr_tex_id     = new QOpenGLTexture(image);
+
+        scr_tex_id     = new QOpenGLTexture(image.mirrored());
         scr_tex_width  = image.width();
         scr_tex_height = image.height();
         bFirstDraw    = true;

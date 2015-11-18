@@ -181,8 +181,9 @@ void GLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
     qDebug() << "Initializing the 3D window widget.";
-    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
     makeCurrent();
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     QColor bgColor = QColor::fromCmykF(0.79, 0.79, 0.79, 0.0).dark();
     glClearColor(bgColor.redF(),bgColor.greenF(),bgColor.blueF(),1.0);
 
@@ -470,21 +471,27 @@ void GLWidget::initializeGL()
 
     m_prefiltered_env_map = new GLTextureCube(512);
 
-    resizeFBOs();
+    //resizeFBOs();
     bInitialized = true;
     emit readyGL();
 }
 
-void GLWidget::updateGL()
+void GLWidget::paintGL()
 {
 
-    return;
+    resizeFBOs();
+    makeCurrent();
+    colorFBO->bindDefault();
+    //makeCurrent();
+
     GLCHK(glReadBuffer(GL_BACK));
     // ---------------------------------------------------------
     // Drawing env
     // ---------------------------------------------------------
     bakeEnviromentalMaps();
+    makeCurrent();
     colorFBO->bindDefault();
+    makeCurrent();
     GLCHK( glViewport(0, 0, width(), height()) );
 
     if(cameraInterpolation < 1.0){
@@ -499,27 +506,30 @@ void GLWidget::updateGL()
     // setting the camera viewpoint
     viewMatrix = camera.updateCamera();
 
-    colorFBO->bind();
-
+   // colorFBO->bind();
+    makeCurrent();
     GLCHK( glDisable(GL_CULL_FACE) );
     projectionMatrix.setToIdentity();
     projectionMatrix.perspective(zoom,ratio,0.1,350.0);
 
 
-
+    makeCurrent();
+    colorFBO->bind();
+    //makeCurrent();
+    //qDebug() << "t=" << colorFBO->fbo->isBound() << colorFBO->fbo->isValid();
 
     // set to which FBO result will be drawn
     GLuint attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 , GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(4,  attachments);
     GLCHK( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
+    // makeCurrent();
 
-    GLCHK( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
 
     // ---------------------------------------------------------
     // Drawing skybox
     // ---------------------------------------------------------
 
-
+    // makeCurrent();
     skybox_program->bind();
 
     objectMatrix.setToIdentity();
@@ -540,7 +550,13 @@ void GLWidget::updateGL()
     GLCHK( skybox_program->setUniformValue("ProjectionMatrix"      , projectionMatrix) );
     GLCHK( glActiveTexture(GL_TEXTURE0) );
     GLCHK( m_env_map->bind());
+
     GLCHK( skybox_mesh->drawMesh(true) );
+
+
+
+   // colorFBO->bindDefault();
+    //makeCurrent();
 
 
     // ---------------------------------------------------------
@@ -572,6 +588,7 @@ void GLWidget::updateGL()
         objectMatrix.scale(0.5/mesh->radius);
         objectMatrix.translate(-mesh->centre_of_mass);
     }
+
     modelViewMatrix = viewMatrix*objectMatrix;
     NormalMatrix = modelViewMatrix.normalMatrix();
     float mesh_scale = 0.5/mesh->radius;
@@ -674,12 +691,19 @@ void GLWidget::updateGL()
     GLuint attachments2[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1,  attachments2);
 
-
+    //makeCurrent();
     colorFBO->bindDefault();
+    makeCurrent();
 
     GLCHK( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
 
 
+    //GLuint t = (*(fboIdPtrs[6]))->texture();
+    //GLCHK( applyNormalFilter(t));
+
+    GLCHK( applyNormalFilter(colorFBO->fbo->texture()));
+    return;
+    /*
 
     // do post processing if materials are not shown
     if( keyPressed != KEY_SHOW_MATERIALS ){
@@ -725,17 +749,21 @@ void GLWidget::updateGL()
     GLCHK( filter_program->release() );
 
     emit renderGL();
+    */
 
 }
 
 void GLWidget::bakeEnviromentalMaps(){
     if(bDiffuseMapBaked) return;
     bDiffuseMapBaked = true;
+
     // ---------------------------------------------------------
     // Drawing env - one pass method
     // ---------------------------------------------------------
     GLCHK(env_program->bind());
+
     GLCHK(m_prefiltered_env_map->bindFBO());
+
     GLCHK(glViewport(0,0,512,512));
 
     objectMatrix.setToIdentity();
@@ -752,18 +780,23 @@ void GLWidget::bakeEnviromentalMaps(){
     GLCHK( env_program->setUniformValue("ProjectionMatrix"      , projectionMatrix) );
 
     GLCHK( glActiveTexture(GL_TEXTURE0) );
+
     GLCHK( m_env_map->bind());
+
     GLCHK( env_mesh->drawMesh(true) );
+
 
     GLCHK(glBindFramebuffer   (GL_FRAMEBUFFER, 0));
 
     GLCHK(glViewport(0, 0, width(), height())) ;
+
 }
 
 void GLWidget::resizeGL(int width, int height)
 {
     ratio = float(width)/height;
-    resizeFBOs();
+    bResizeFBOs = true;
+    //resizeFBOs();
 
     GLCHK( glViewport(0, 0, width, height) );
 }
@@ -809,7 +842,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     }
 
 
-    paintGL();
+    update();
     // capture the pixel color if material preview is enabled
     if((event->buttons() & Qt::LeftButton) && keyPressed == KEY_SHOW_MATERIALS){
 
@@ -879,6 +912,7 @@ void GLWidget::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::Mouse
     }else{
         *wrapMouse = false;
     }
+    update();
 }
 //! [10]
 
@@ -886,7 +920,7 @@ void GLWidget::wheelEvent(QWheelEvent *event){
     int numDegrees = -event->delta();
     camera.mouseWheelMove((numDegrees));
 
-    paintGL();
+    update();
 }
 
 void GLWidget::dropEvent(QDropEvent *event)
@@ -999,7 +1033,7 @@ bool GLWidget::loadMeshFile(const QString &fileName, bool bAddExtension)
         delete new_mesh;
     }
 
-    paintGL();
+    update();
     return true;
 }
 
@@ -1024,14 +1058,14 @@ void GLWidget::chooseSkyBox(QString cubeMapName,bool bFirstTime){
         qWarning() << "Cannot load cube map: check if images listed above exist.";
     }
     // skip this when loading first cube map
-    if(!bFirstTime)paintGL();
-    else qDebug() << "Skipping glWidget repainting during first Env. maps. load.";
+    if(!bFirstTime)update();
+    else qDebug() << "Skipping glWidget updateing during first Env. maps. load.";
 }
 
 void GLWidget::updatePerformanceSettings(Display3DSettings settings){
     qDebug() << "Changing 3D settings";
     display3Dparameters = settings;
-    paintGL();
+    update();
 }
 
 
@@ -1040,6 +1074,10 @@ void GLWidget::updatePerformanceSettings(Display3DSettings settings){
 //                          POST PROCESSING TOOLS
 // ------------------------------------------------------------------------------- //
 void GLWidget::resizeFBOs(){
+    if(!bResizeFBOs) return;
+    bResizeFBOs = false;
+    makeCurrent();
+    qDebug() << "Res 3D" << width() << height() ;
 
     if(colorFBO != NULL) delete colorFBO;
     colorFBO = new GLFrameBufferObject(width(),height());
@@ -1060,6 +1098,7 @@ void GLWidget::resizeFBOs(){
         glowInputColor[i]  = new GLFrameBufferObject(width()/pow(2.0,i+1),height()/pow(2.0,i+1));
         glowOutputColor[i] = new GLFrameBufferObject(width()/pow(2.0,i+1),height()/pow(2.0,i+1));
     }
+     makeCurrent();
 
 }
 void GLWidget::deleteFBOs(){
@@ -1090,7 +1129,7 @@ void GLWidget::applyNormalFilter(GLuint input_tex){
 
 }
 
-void GLWidget::copyTexToFBO(GLuint input_tex,QGLFramebufferObject* dst){
+void GLWidget::copyTexToFBO(GLuint input_tex,QOpenGLFramebufferObject* dst){
 
     filter_program = post_processing_programs["NORMAL_FILTER"];
     filter_program->bind();
@@ -1107,8 +1146,8 @@ void GLWidget::copyTexToFBO(GLuint input_tex,QGLFramebufferObject* dst){
 }
 
 void GLWidget::applyGaussFilter(  GLuint input_tex,
-                                  QGLFramebufferObject* auxFBO,
-                                  QGLFramebufferObject* outputFBO, float radius){
+                                  QOpenGLFramebufferObject* auxFBO,
+                                  QOpenGLFramebufferObject* outputFBO, float radius){
 
 
 
@@ -1139,7 +1178,7 @@ void GLWidget::applyGaussFilter(  GLuint input_tex,
 }
 
 void GLWidget::applyDofFilter(GLuint input_tex,
-                QGLFramebufferObject* outputFBO){
+                QOpenGLFramebufferObject *outputFBO){
 
     //applyGaussFilter(input_tex,auxFBO,outputFBO,15.0);
 
@@ -1166,7 +1205,7 @@ void GLWidget::applyDofFilter(GLuint input_tex,
 
 
 
-void GLWidget::applyGlowFilter(QGLFramebufferObject* outputFBO){
+void GLWidget::applyGlowFilter(QOpenGLFramebufferObject* outputFBO){
 
 
 
@@ -1209,7 +1248,7 @@ void GLWidget::applyGlowFilter(QGLFramebufferObject* outputFBO){
 }
 
 
-void GLWidget::applyToneFilter(GLuint input_tex,QGLFramebufferObject* outputFBO){
+void GLWidget::applyToneFilter(GLuint input_tex, QOpenGLFramebufferObject *outputFBO){
 
 
     filter_program = post_processing_programs["TONE_MAPPING_FILTER"];
@@ -1227,7 +1266,7 @@ void GLWidget::applyToneFilter(GLuint input_tex,QGLFramebufferObject* outputFBO)
     GLCHK( glActiveTexture(GL_TEXTURE0) );
 }
 
-void GLWidget::applyLensFlaresFilter(GLuint input_tex,QGLFramebufferObject* outputFBO){
+void GLWidget::applyLensFlaresFilter(GLuint input_tex,QOpenGLFramebufferObject* outputFBO){
     // Based on: http://john-chapman-graphics.blogspot.com/2013/02/pseudo-lens-flare.html
     // prepare mask image
     if(!display3Dparameters.bBloomEffect){

@@ -351,12 +351,12 @@ GLFrameBufferObject::GLFrameBufferObject(int width, int height)
 
     fbo = NULL;
     attachments.clear();
-    QGLFramebufferObjectFormat format;
+    QOpenGLFramebufferObjectFormat format;
     format.setInternalTextureFormat(TEXTURE_FORMAT);
     format.setTextureTarget(GL_TEXTURE_2D);
     format.setMipmap(true);
-    format.setAttachment(QGLFramebufferObject::Depth);
-    fbo = new QGLFramebufferObject(width,height,format);
+    format.setAttachment(QOpenGLFramebufferObject::Depth);
+    fbo = new QOpenGLFramebufferObject(width,height,format);
     glBindTexture(GL_TEXTURE_2D, fbo->texture());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);

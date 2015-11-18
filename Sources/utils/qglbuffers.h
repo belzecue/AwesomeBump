@@ -81,7 +81,7 @@ public:
     void bindDefault();
     bool addTexture(GLenum COLOR_ATTACHMENTn);
     const GLuint& getAttachedTexture(GLuint index);
-    QGLFramebufferObject *fbo;
+    QOpenGLFramebufferObject *fbo;
 protected:
     int m_width, m_height;
     bool m_failed;    

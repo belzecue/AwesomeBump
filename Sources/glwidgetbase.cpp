@@ -43,11 +43,11 @@ void GLWidgetBase::paintGL()
 {
     if(!bInitialized) return;
 
-    updateGL();
+    //updateGL();
 
+    QOpenGLWidget::paintGL();
 
-
-
+/*
     if(updateIsQueued == false)
     {
         // Queue the updating the OpenGL Widget
@@ -64,7 +64,7 @@ void GLWidgetBase::paintGL()
         updateGLNow();
     }
 
-
+*/
 }
 
 void GLWidgetBase::mousePressEvent(QMouseEvent *event)
@@ -72,7 +72,7 @@ void GLWidgetBase::mousePressEvent(QMouseEvent *event)
     lastCursorPos = event->pos();
 
     // reset the mouse handling state with, to avoid a bad state
-    blockMouseMovement = false;
+    blockMouseMovement  = false;
     mouseUpdateIsQueued = false;
 
 }
@@ -82,7 +82,7 @@ void GLWidgetBase::mousePressEvent(QMouseEvent *event)
 
 void GLWidgetBase::mouseMoveEvent(QMouseEvent *event)
 {
-
+    if(event->buttons() == 0) return;
     if(blockMouseMovement)
     {
         // If the mouse was wrapped manually, ignore all mouse events until

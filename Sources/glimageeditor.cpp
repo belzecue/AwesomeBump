@@ -336,11 +336,12 @@ void GLImage::initializeGL()
     emit readyGL();
 }
 
-void GLImage::updateGL()
+void GLImage::paintGL()
 {
 
 
     qDebug() << "Doing plot:" << PostfixNames::getTextureName(activeImage->imageType);
+
     // Perform filters on images and render the final result to renderFBO
     // avoid rendering function if there is rendered something already
     if(!bSkipProcessing && !bRendering){        
@@ -1115,7 +1116,7 @@ void GLImage::resizeGL(int width, int height)
 
 void GLImage::setActiveImage(FBOImageProporties* ptr){
         activeImage = ptr;
-        repaint();
+        update();
 }
 void GLImage::enableShadowRender(bool enable){
         bShadowRender = enable;
@@ -1137,16 +1138,16 @@ void GLImage::updateCornersPosition(QVector2D dc1,QVector2D dc2,QVector2D dc3,QV
     for(int i = 0 ; i < 4 ; i++){
         grungeCornerPositions[i] = cornerPositions[i];
     }
-    repaint();
+    update();
 }
 void GLImage::selectPerspectiveTransformMethod(int method){
     gui_perspective_mode = method;
-    repaint();
+    update();
 }
 
 void GLImage::selectUVManipulationMethod(UVManipulationMethods method){
     uvManilupationMethod = method;
-    repaint();
+    update();
 }
 
 void GLImage::updateCornersWeights(float w1,float w2,float w3,float w4){
@@ -1154,12 +1155,12 @@ void GLImage::updateCornersWeights(float w1,float w2,float w3,float w4){
     cornerWeights.setY( w2);
     cornerWeights.setZ( w3);
     cornerWeights.setW( w4);
-    repaint();
+    update();
 }
 
 void GLImage::selectSeamlessMode(SeamlessMode mode){
     FBOImageProporties::seamlessMode = mode;
-    repaint();
+    update();
 }
 
 
@@ -3030,7 +3031,7 @@ void GLImage::wheelEvent(QWheelEvent *event){
     xTranslation =        double(p.x())/width() *orthographicProjWidth  - cursorPhysicalXPosition;
     yTranslation = ((1.0-double(p.y())/height())*orthographicProjHeight - cursorPhysicalYPosition );
 
-    repaint();
+    update();
 }
 
 void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseButtons buttons)
@@ -3190,7 +3191,7 @@ void GLImage::relativeMouseMoveEvent(int dx, int dy, bool* wrapMouse, Qt::MouseB
         setCursor(Qt::UpArrowCursor);
     }
 
-    repaint();
+    update();
 }
 void GLImage::mousePressEvent(QMouseEvent *event)
 {
@@ -3202,7 +3203,7 @@ void GLImage::mousePressEvent(QMouseEvent *event)
     if (event->buttons() & Qt::RightButton) {
         setCursor(Qt::ClosedHandCursor);
     }
-    repaint();
+    update();
 
 
     // In case of color picking: emit and stop picking
@@ -3221,7 +3222,7 @@ void GLImage::mouseReleaseEvent(QMouseEvent *event){
     draggingCorner = -1;
     event->accept();
     bSkipProcessing = true;
-    repaint();
+    update();
 }
 
 void GLImage::toggleColorPicking(bool toggle){
