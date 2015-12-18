@@ -53,7 +53,7 @@ qt5_wrap_ui(UI_HEADERS Sources/allaboutdialog.ui Sources/dialogheightcalculator.
     Sources/mainwindow.ui Sources/dockwidget3dsettings.ui Sources/unitysupportgui.ui)
 qt5_add_resources(UI_RESOURCES Sources/content.qrc)
 
-set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS} -std=c++0x")
 set(AwesomeBump_SRCS
     Sources/utils/Mesh.cpp Sources/utils/qglbuffers.cpp
     Sources/utils/tinyobj/tiny_obj_loader.cc Sources/CommonObjects.cpp
